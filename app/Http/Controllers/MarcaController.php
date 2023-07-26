@@ -31,7 +31,16 @@ class MarcaController extends Controller
     public function store(Request $request)
     {
         // $marca = Marca::create($request->all());
-        $marcas = $this->marca->create($request->all());
+       
+        $request->validate($this->marca->rules(), $this->marca->feedback());
+
+        $imagem = $request->imagem;
+        $imagem_urn = $imagem->store('imagens', 'public');
+
+        $marcas = $this->marca->create([
+            'nome' => $request->nome,
+            'imagem' => $imagem_urn
+        ]);
         return response()->json($marcas, 201);
     }
 
@@ -60,8 +69,25 @@ class MarcaController extends Controller
         if($marcas === null){
             return response()->json(['msg' => 'impossível realizar a atualização do registro'], 404);
         }
+
+        if($request->method() === 'PATCH'){
+
+            $regrasDinamicas = array();
+
+            foreach($marcas->rules() as $input => $regra){
+
+                if(array_key_exists($input, $request->all())){
+                     $regrasDinamicas[$input] = $regra;
+                }
+            }
+
+            $request->validate($regrasDinamicas);
+        }else{
+            
+            $request->validate($marcas->rules(), $marcas->feedback());
+        }
         
-        $marcas->update($request->all());
+        $marcas->update($request->all());   
         return response()->json($marcas, 200);
     }
 
