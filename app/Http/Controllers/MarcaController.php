@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\Marca;
 use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MarcaController extends Controller
 {
@@ -20,9 +22,7 @@ class MarcaController extends Controller
     public function index()
     {
         //$marca = Marca::all();
-
-        $marcas = $this->marca->all();
-        return response()->json($marcas, 200);
+        return response()->json($this->marca->with('modelos')->get(), 200);
     }
 
     /**
@@ -41,6 +41,7 @@ class MarcaController extends Controller
             'nome' => $request->nome,
             'imagem' => $imagem_urn
         ]);
+
         return response()->json($marcas, 201);
     }
 
@@ -49,7 +50,7 @@ class MarcaController extends Controller
      */
     public function show($id)
     {
-        $marcas = $this->marca->find($id);
+        $marcas = $this->marca->with('modelos')->find($id);
 
         if($marcas === null){
             return response()->json(['msg' => 'Recurso pesquisado não existe'], 404);
@@ -83,11 +84,26 @@ class MarcaController extends Controller
 
             $request->validate($regrasDinamicas);
         }else{
-            
+
             $request->validate($marcas->rules(), $marcas->feedback());
         }
         
-        $marcas->update($request->all());   
+        //remove um antigo caso um nove esteja enviado no request
+        if($request->imagem){
+            Storage::disk('public')->delete($marcas->imagem);
+        }
+
+        $imagem = $request->imagem;
+        $imagem_urn = $imagem->store('imagens', 'public');
+        
+        $marcas->fill($request->all());
+        $marcas->imagem = $imagem_urn;
+        $marcas->save();
+        
+        $marcas->update([
+            'nome' => $request->nome,
+            'imagem' => $imagem_urn
+        ]);   
         return response()->json($marcas, 200);
     }
 
@@ -102,6 +118,8 @@ class MarcaController extends Controller
         if($marcas === null){
             return response()->json(['msg' => 'impossível a remoção do registro'], 404);
         }
+
+        Storage::disk('public')->delete($marcas->imagem);
         
         $marcas->delete();
         return response(['msg' => 'removida com sucesso'], 200);
