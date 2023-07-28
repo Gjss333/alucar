@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Modelo;
+use App\Repositories\ModeloRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,42 +20,25 @@ class ModeloController extends Controller
      */
     public function index(Request $request)
     {
-        $modelo = array();
+        $modeloRepository = new ModeloRepository($this->modelo);
 
-        if($request->has('atributos_marcas')){
-            $atributos_marcas = $request->atributos_marcas;
-            $modelo =  $this->modelo->with('marca:id,'.$atributos_marcas);
+        if($request->has('atributos_marca')){
+            $atributos_modelos = 'marca:id,'.$request->atributos_modelos;
+            $modeloRepository->selectAtributosRegistrosRelacionados($atributos_modelos);
         } else{
-            $modelo = $this->modelo->with('marca');
+            $modeloRepository->selectAtributosRegistrosRelacionados('marca');
         }
 
         if($request->has('filtro')){
-
-            $filtros = explode(';', $request->filtro);
-            foreach($filtros as $key => $condicao ){
-                
-                $c = explode(':', $condicao);
-                $modelo = $modelo->where($c[0], $c[1],$c[2]);
-            }
-
+            $modeloRepository->filtros($request->filtro);
         }
 
-        $filtro = $request->filtro;
-        
-        dd($filtro);
-
-        //verifica se um determinado parametro existe no request
         if($request->has('atributos')){
-            // dd($request->atributos);
-            $atributos = $request->atributos;
-            $modelo = $modelo->selectRaw($atributos)->get();
-            // dd($atributos_marcas);
+           $modeloRepository->selectAtributos($request->atributos);
 
-        } else{
-            $modelo = $modelo->get();
         }
-        //$this->modelo->with('marca')->get()
-        return response()->json($modelo, 200);
+
+        return response()->json($modeloRepository->getResultado(), 200);
     }
 
     /**
