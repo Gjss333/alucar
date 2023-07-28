@@ -20,14 +20,38 @@ class ModeloController extends Controller
     public function index(Request $request)
     {
         $modelo = array();
+
+        if($request->has('atributos_marcas')){
+            $atributos_marcas = $request->atributos_marcas;
+            $modelo =  $this->modelo->with('marca:id,'.$atributos_marcas);
+        } else{
+            $modelo = $this->modelo->with('marca');
+        }
+
+        if($request->has('filtro')){
+
+            $filtros = explode(';', $request->filtro);
+            foreach($filtros as $key => $condicao ){
+                
+                $c = explode(':', $condicao);
+                $modelo = $modelo->where($c[0], $c[1],$c[2]);
+            }
+
+        }
+
+        $filtro = $request->filtro;
+        
+        dd($filtro);
+
         //verifica se um determinado parametro existe no request
         if($request->has('atributos')){
             // dd($request->atributos);
             $atributos = $request->atributos;
-            $modelo = $this->modelo->selectRaw($atributos)->with('marca')->get();
+            $modelo = $modelo->selectRaw($atributos)->get();
+            // dd($atributos_marcas);
 
         } else{
-            $modelo = $this->modelo->with('marca')->get();
+            $modelo = $modelo->get();
         }
         //$this->modelo->with('marca')->get()
         return response()->json($modelo, 200);

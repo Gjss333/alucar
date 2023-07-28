@@ -19,9 +19,38 @@ class MarcaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //$marca = Marca::all();
+        $marca = array();
+
+        if($request->has('atributos_modelos')){
+            $atributos_modelos = $request->atributos_modelos;
+            $marca =  $this->marca->with('modelos:id,'.$atributos_modelos);
+        } else{
+            $marca = $this->marca->with('modelos');
+        }
+
+        if($request->has('filtro')){
+
+            $filtros = explode(';', $request->filtro);
+            foreach($filtros as $key => $condicao ){
+                
+                $c = explode(':', $condicao);
+                $marca = $marca->where($c[0], $c[1],$c[2]);
+            }
+
+        }
+
+        if($request->has('atributos')){
+            // dd($request->atributos);
+            $atributos = $request->atributos;
+            $marca = $marca->selectRaw($atributos)->get();
+            // dd($atributos_marcas);
+
+        } else{
+            $marca = $marca->get();
+        }
+        
         return response()->json($this->marca->with('modelos')->get(), 200);
     }
 
