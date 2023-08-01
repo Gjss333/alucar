@@ -1,6 +1,5 @@
 @extends('layouts.app')
 
 @section('content')
-
-    <index-component xyz="Propriedade 1" abc="propriedade 2"></index-component>
+    <index-component csrf_token="{{@csrf_token()}}"></index-component>
 @endsection

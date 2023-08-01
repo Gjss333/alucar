@@ -21,6 +21,21 @@ app.component('example-component', ExampleComponent);
 import Index from './components/Index.vue';
 app.component('index-component', Index);
 
+import Home from './components/Home.vue';
+app.component('home-component', Home);
+
+import Marcas from './components/Marcas.vue';
+app.component('marcas-component', Marcas);
+
+import InputContainer from './components/InputContainer.vue';
+app.component('input-container-component', InputContainer);
+
+import Table from './components/Table.vue';
+app.component('table-component', Table);
+
+import Card from './components/Card.vue';
+app.component('card-component', Card);
+
 
 
 /**
