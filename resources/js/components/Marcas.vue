@@ -7,8 +7,8 @@
                         <div class="row g-3">
                             <div class="col mb-3">
                                 <input-container-component titulo="ID" id="inputId" id-help="idHelp" texto-ajuda="Opcional. Informe o Id da marca">
-                                    <input type="number" class="form-control" id="inputId" aria-describedby="idHelp" placeholder="ID">
-                                </input-container-component>  
+                                <input type="number" class="form-control" id="inputId" aria-describedby="idHelp" placeholder="ID">
+                            </input-container-component>  
                             </div>
                             <div class="col mb-3">
                                 <input-container-component titulo="Nome da Marca" id="inputNome" id-help="NomeHelp" texto-ajuda="Opcional. Informe o Nome da marca">
@@ -17,7 +17,7 @@
                             </div>
                         </div>
                     </template> 
-
+            
                     <template v-slot:rodape>
                         <button type="submit" class="btn btn-primary btn-sm float-end">Pesquisar</button>
                     </template>
@@ -28,7 +28,7 @@
                         <table-component></table-component>
                     </template>
 
-                <template v-slot:rodape>
+                    <template v-slot:rodape>
                         <button type="button" class="btn btn-primary btn-sm float-end"  data-bs-toggle="modal" data-bs-target="#modalMarca">Adicionar</button>
                     </template>
                 </card-component>
@@ -38,6 +38,12 @@
 
 
     <modal-component id="modalMarca" titulo="adicionar marca">
+
+        <template v-slot:alertas>
+            <alert-component tipo="success" :detalhes="transacaoDetalhes" titulo="Cadastro realizado com sucesso" v-if="transacaoStatus == 'Adicionado'"></alert-component> 
+            <alert-component tipo="danger" :detalhes="transacaoDetalhes" titulo ="Error ao Tentar Cadastrar a marca" v-if="transacaoStatus == 'Erro'"></alert-component> 
+        </template>
+
         <template v-slot:conteudo>
             <div class="form-group">
                 <input-container-component titulo="Nome da Marca" id="novoNome" id-help="novoNomeHelp" texto-ajuda="Informe o Nome da marca">
@@ -45,7 +51,6 @@
                 </input-container-component>
                 {{ nomeMarca }}
             </div>
-        
             <div class="form-group">
                 <input-container-component titulo="Imagem" id="novoImagem" id-help="novoImagemHelp" texto-ajuda="selecione uma imagem em formato png">
                     <input type="file" class="form-control" id="novoImagem" aria-describedby="novoImagemHelp" placeholder="selecione uma imagem" @change="carregarImagem($event)">
@@ -54,7 +59,7 @@
         </template>
 
         <template v-slot:rodape>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            <button type="button" class="btn btn-secondary"  data-bs-dismiss="modal">Fechar</button>
             <button type="button" class="btn btn-primary" @click="salvar()">Salvar</button>
         </template>
         {{ arquivoImagem }}
@@ -66,10 +71,13 @@
     export default{
         computed: {
                 token(){
-                    
-                    let token = document.cookie
-                    console.log(token)
-                    return 'teste'
+                    let token = document.cookie.split(';').find(indice => {
+                        return indice.startsWith('token=')
+                    })
+
+                    token = token.split('=')[1]
+                    token = 'Bearer ' + token
+                    return token
                 }
             },
 
@@ -77,7 +85,11 @@
             return{
                 urlBase: 'http://localhost:8000/api/v1/marca',
                 nomeMarca: '',
-                arquivoImagem: []
+                arquivoImagem: [],
+                transacaoStatus: '',
+                transacaoDetalhes: {
+
+                }
             }
         },
         methods: {
@@ -103,9 +115,21 @@
 
                 axios.post(this.urlBase, formData, config )
                     .then(response => {
-                        console.log(response)
+                        this.transacaoStatus = 'Adicionado'
+                        this.transacaoStatus = {
+                            mensagem:'ID do registro ' + response.data.id 
+                        } 
+                    
+                        
                     })
-                    .catch(errors)
+                    .catch(errors => {
+                        this.transacaoStatus = 'Erro'
+                        this.transacaoDetalhes = {
+                            mensagem: errors.response.data.message ,
+                            dados: errors.response.data.errors   
+                        }
+                        console.log(errors.response.data.message)
+                    })
             }
         }
     }

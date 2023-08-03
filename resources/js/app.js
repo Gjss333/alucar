@@ -39,6 +39,10 @@ app.component('card-component', Card);
 import Modal from './components/Modal.vue';
 app.component('modal-component', Modal);
 
+import Alert from './components/Alert.Vue';
+app.component('alert-component', Alert);
+
+
 
 
 /**
