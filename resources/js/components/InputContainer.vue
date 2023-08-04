@@ -1,6 +1,6 @@
 <template>
-    <div class="row g-3">
-        <label :for="id" class="form-label">{{titulo}}</label>
+    <label :for="id" class="form-label">{{titulo}}</label>
+    <div class="row p-1 g-3">
         <slot></slot>
         <div :id="idHelp" class="form-text text-muted">{{textoAjuda}}</div>
     </div>

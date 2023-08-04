@@ -25,7 +25,15 @@
 
                 <card-component titulo="Relação de Marcas">
                     <template v-slot:conteudo>
-                        <table-component></table-component>
+                        <table-component 
+                            :dados="marcas" 
+                            :titulos="{
+                                id: {titulo: 'ID', tipo: 'text'},
+                                nome: {titulo: 'Nome', tipo: 'text'},
+                                imagem: {titulo: 'Imagem', tipo: 'imagem'},
+                                created_at: {titulo: 'Data de Criaçãoo', tipo: 'data'},
+                            }"
+                        ></table-component>
                     </template>
 
                     <template v-slot:rodape>
@@ -87,15 +95,34 @@
                 nomeMarca: '',
                 arquivoImagem: [],
                 transacaoStatus: '',
-                transacaoDetalhes: {
-
-                }
+                transacaoDetalhes: {},
+                marcas: []
             }
         },
         methods: {
+            carregarLista(){
+                let config = {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Accept': 'application/json',
+                        'Authorization': this.token
+                    }
+                }
+
+                axios.get(this.urlBase, config)
+                    .then(response => {
+                        this.marcas = response.data
+                        //console.log(this.marcas)
+                    })
+                    .catch(errors => {
+                        console.log(errors)
+                    })
+            },
+
             carregarImagem(e){
                 this.arquivoImagem = e.target.files
             },
+
             salvar(){
                 console.log(this.nomeMarca, this.arquivoImagem[0])
 
@@ -131,6 +158,9 @@
                         console.log(errors.response.data.message)
                     })
             }
+        },
+        mounted(){
+            this.carregarLista()
         }
     }
 </script>
