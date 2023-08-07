@@ -42,6 +42,9 @@ app.component('modal-component', Modal);
 import Alert from './components/Alert.Vue';
 app.component('alert-component', Alert);
 
+import Paginate from './components/Paginate.Vue';
+app.component('paginate-component', Paginate);
+
 
 
 
