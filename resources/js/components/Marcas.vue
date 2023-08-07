@@ -7,26 +7,29 @@
                         <div class="row g-3">
                             <div class="col mb-3">
                                 <input-container-component titulo="ID" id="inputId" id-help="idHelp" texto-ajuda="Opcional. Informe o Id da marca">
-                                <input type="number" class="form-control" id="inputId" aria-describedby="idHelp" placeholder="ID">
-                            </input-container-component>  
+                                    <input type="number" class="form-control" id="inputId" aria-describedby="idHelp" placeholder="ID" v-model="busca.id">
+                                </input-container-component>  
                             </div>
                             <div class="col mb-3">
                                 <input-container-component titulo="Nome da Marca" id="inputNome" id-help="NomeHelp" texto-ajuda="Opcional. Informe o Nome da marca">
-                                    <input type="text" class="form-control" id="inputNome" aria-describedby="NomeHelp" placeholder="Nome da Marca">
+                                    <input type="text" class="form-control" id="inputNome" aria-describedby="NomeHelp" placeholder="Nome da Marca" v-model="busca.nome">
                                 </input-container-component> 
                             </div>
                         </div>
                     </template> 
             
                     <template v-slot:rodape>
-                        <button type="submit" class="btn btn-primary btn-sm float-end">Pesquisar</button>
+                        <button type="submit" class="btn btn-primary btn-sm float-end" @click="pesquisar()">Pesquisar</button>
                     </template>
                 </card-component>
 
                 <card-component titulo="Relação de Marcas">
                     <template v-slot:conteudo>
                         <table-component 
-                            :dados="marcas.data" 
+                            :dados="marcas.data"
+                            :visualizar="true"
+                            :atualizar="true"
+                            :remover="true"
                             :titulos="{
                                 id: {titulo: 'ID', tipo: 'text'},
                                 nome: {titulo: 'Nome', tipo: 'text'},
@@ -108,21 +111,49 @@
                 arquivoImagem: [],
                 transacaoStatus: '',
                 transacaoDetalhes: {},
-                marcas: {
-                    data: []
-                }
+                marcas: { data: [] },
+                busca: { id: '', nome: '' },
+                urlPaginacao: '',
+                urlFiltro: ''
             }
         },
         methods: {
+            pesquisar(){
+                // console.log(this.busca)
+
+                let filtro = ''
+
+                for(let chave in this.busca){
+
+                    if(this.busca[chave]){
+
+                        if(filtro != ''){
+                            filtro += ';'
+                        }
+                        filtro += chave + ':like:' + this.busca[chave]
+                    }
+
+                }
+                if(filtro != ''){
+                    this.urlPaginacao = 'page=1'
+                    this.urlFiltro = '&filtro='+filtro+'%'
+                }else{
+                    this.urlFiltro = ''
+                }
+                this.carregarLista()
+            },
             paginacao(l){
                 if(l.url){
 
-                    this.urlBase = l.url
+                    this.urlPaginacao = l.url.split('?')[1]
                     this.carregarLista()
                 }
             },
 
             carregarLista(){
+
+                let url = this.urlBase + '?' + this.urlPaginacao + this.urlFiltro
+
                 let config = {
                     headers: {
                         'Content-Type': 'multipart/form-data',
@@ -131,7 +162,7 @@
                     }
                 }
 
-                axios.get(this.urlBase, config)
+                axios.get(url, config)
                     .then(response => {
                         this.marcas = response.data
                         // console.log(response.data)
