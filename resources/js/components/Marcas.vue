@@ -90,7 +90,25 @@
     <modal-component id="modalMarcaVisualizar" titulo="visualizar marca">
         <template v-slot:alertas></template>
         <template v-slot:conteudo>
-            Teste   
+            {{ $store.state.item }} 
+            <input-container-component titulo="ID">
+                <input type="text" class="form-control" :value="$store.state.item.id" disabled>
+            </input-container-component>
+
+            <input-container-component titulo="Nome">
+                <input type="text" class="form-control" :value="$store.state.item.nome" disabled>
+            </input-container-component>
+
+            <div class="d-flex align-items-center">
+
+                <input-container-component titulo="Imagem" >
+                    <img :src="'storage/'+$store.state.item.imagem" v-if="$store.state.item.imagem">
+            </input-container-component>
+            </div>
+
+            <input-container-component titulo="Data de Criação">
+                <input type="text" class="form-control" :value="$store.state.item.created_at" disabled>
+            </input-container-component>
         </template>
         <template v-slot:rodape>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
