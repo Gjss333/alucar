@@ -27,7 +27,7 @@
                     <template v-slot:conteudo>
                         <table-component 
                             :dados="marcas.data"
-                            :visualizar="true"
+                            :visualizar="{ visivel: true, dataBsToggle: 'modal', dataBsTarget: '#modalMarcaVisualizar' }"
                             :atualizar="true"
                             :remover="true"
                             :titulos="{
@@ -59,7 +59,7 @@
         </div>
     </div>
 
-
+    <!-- Inclusao de marca -->
     <modal-component id="modalMarca" titulo="adicionar marca">
 
         <template v-slot:alertas>
@@ -72,7 +72,7 @@
                 <input-container-component titulo="Nome da Marca" id="novoNome" id-help="novoNomeHelp" texto-ajuda="Informe o Nome da marca">
                     <input type="text" class="form-control" id="novoNome" aria-describedby="novoNomeHelp" placeholder="Nome da Marca" v-model="nomeMarca">
                 </input-container-component>
-                {{ nomeMarca }}
+
             </div>
             <div class="form-group">
                 <input-container-component titulo="Imagem" id="novoImagem" id-help="novoImagemHelp" texto-ajuda="selecione uma imagem em formato png">
@@ -85,7 +85,17 @@
             <button type="button" class="btn btn-secondary"  data-bs-dismiss="modal">Fechar</button>
             <button type="button" class="btn btn-primary" @click="salvar()">Salvar</button>
         </template>
-        {{ arquivoImagem }}
+    </modal-component>
+
+    <modal-component id="modalMarcaVisualizar" titulo="visualizar marca">
+        <template v-slot:alertas></template>
+        <template v-slot:conteudo>
+            Teste   
+        </template>
+        <template v-slot:rodape>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        </template>
+
     </modal-component>
 
 </template>
