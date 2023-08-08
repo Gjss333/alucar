@@ -9,7 +9,6 @@
          </ul>
          
          <hr>
-         {{ detalhes.data.errors }}
 
     </div>  
 </template>

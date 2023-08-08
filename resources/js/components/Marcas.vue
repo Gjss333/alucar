@@ -29,7 +29,7 @@
                             :dados="marcas.data"
                             :visualizar="{ visivel: true, dataBsToggle: 'modal', dataBsTarget: '#modalMarcaVisualizar' }"
                             :atualizar="true"
-                            :remover="true"
+                            :remover="{ visivel: true, dataBsToggle: 'modal', dataBsTarget: '#modalMarcaRemover' }"
                             :titulos="{
                                 id: {titulo: 'ID', tipo: 'text'},
                                 nome: {titulo: 'Nome', tipo: 'text'},
@@ -90,7 +90,7 @@
     <modal-component id="modalMarcaVisualizar" titulo="visualizar marca">
         <template v-slot:alertas></template>
         <template v-slot:conteudo>
-            {{ $store.state.item }} 
+       
             <input-container-component titulo="ID">
                 <input type="text" class="form-control" :value="$store.state.item.id" disabled>
             </input-container-component>
@@ -112,6 +112,29 @@
         </template>
         <template v-slot:rodape>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        </template>
+
+    </modal-component>
+
+    <!-- remoção de marcas -->
+    <modal-component id="modalMarcaRemover" titulo="Remover marca">
+        <template v-slot:alertas>
+            <alert-component tipo="success" titulo="Transação realizada com sucesso" :detalhes="{mensagem: ''}" v-if="$store.state.transacao.status == 'suceso'"></alert-component>
+            <alert-component tipo="danger" titulo="Erro na transação" :detalhes="{mensagem: ''}" v-if="$store.state.transacao.status == 'erro'"></alert-component>
+        </template>
+        <template v-slot:conteudo>
+            
+            <input-container-component titulo="ID">
+                <input type="text" class="form-control" :value="$store.state.item.id" disabled>
+            </input-container-component>
+
+            <input-container-component titulo="Nome">
+                <input type="text" class="form-control" :value="$store.state.item.nome" disabled>
+            </input-container-component>
+        </template>
+        <template v-slot:rodape>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            <button type="button" class="btn btn-danger" @click="remover()">Remover</button>
         </template>
 
     </modal-component>
@@ -146,6 +169,35 @@
             }
         },
         methods: {
+            remover(){
+                let confirmacao = confirm('Tem certeza que deseja remover esse registro')
+
+                if(!confirmacao){
+                    return 'false'
+                }
+
+                let formData = new FormData();
+                formData.append('_method', 'delete')
+
+                let config = {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': this.token
+                    }
+                }
+
+                let url = this.urlBase + '/' + this.$store.state.item.id
+
+                axios.post(url, formData, config)
+                    .then(response => {
+                        console.log('registro removido com sucesso', response)
+                        this.carregarLista()
+                    })
+                    .catch(errors => {
+                        console.log('Houve um erro ao tentar remover o registro', errors.response)
+                    })
+                    
+            },
             pesquisar(){
                 // console.log(this.busca)
 

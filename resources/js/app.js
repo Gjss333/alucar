@@ -16,7 +16,10 @@ import { createStore } from 'Vuex';
 
 const store = createStore({
     state: {
-        item: {}
+        item: {},
+        transacao: {
+            status: '', mensagem: '' 
+        }
     }
     
   })
