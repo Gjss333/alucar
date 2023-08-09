@@ -17,14 +17,17 @@ import { createStore } from 'Vuex';
 const store = createStore({
     state: {
         item: {},
-        transacao: {
-            status: '', mensagem: '' 
-        }
+        transacao: { status: '', mensagem: '' },
+        mutations: {
+            increment (state) {
+              state.count++
+            }
+          }
     }
     
   })
 
-const app = createApp({});
+const app = createApp({store});
 app.use(store)
 
 

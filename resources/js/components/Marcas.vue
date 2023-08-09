@@ -28,7 +28,7 @@
                         <table-component 
                             :dados="marcas.data"
                             :visualizar="{ visivel: true, dataBsToggle: 'modal', dataBsTarget: '#modalMarcaVisualizar' }"
-                            :atualizar="true"
+                            :atualizar="{ visivel: true, dataBsToggle: 'modal', dataBsTarget: '#modalMarcaAtualizar'}"
                             :remover="{ visivel: true, dataBsToggle: 'modal', dataBsTarget: '#modalMarcaRemover' }"
                             :titulos="{
                                 id: {titulo: 'ID', tipo: 'text'},
@@ -89,7 +89,7 @@
 
     <modal-component id="modalMarcaVisualizar" titulo="visualizar marca">
         <template v-slot:alertas></template>
-        <template v-slot:conteudo>
+        <template v-slot:conteudo >
        
             <input-container-component titulo="ID">
                 <input type="text" class="form-control" :value="$store.state.item.id" disabled>
@@ -117,12 +117,12 @@
     </modal-component>
 
     <!-- remoção de marcas -->
-    <modal-component id="modalMarcaRemover" titulo="Remover marca">
+    <modal-component id="modalMarcaRemover" titulo="remover marca">
         <template v-slot:alertas>
-            <alert-component tipo="success" titulo="Transação realizada com sucesso" :detalhes="{mensagem: ''}" v-if="$store.state.transacao.status == 'suceso'"></alert-component>
-            <alert-component tipo="danger" titulo="Erro na transação" :detalhes="{mensagem: ''}" v-if="$store.state.transacao.status == 'erro'"></alert-component>
+            <alert-component tipo="success" titulo="Transação realizada com sucesso" :detalhes="$store.state.transacao" v-if="$store.state.transacao.status == 'sucesso'"></alert-component>
+            <alert-component tipo="danger" titulo="Erro na transação" :detalhes="$store.state.transacao" v-if="$store.state.transacao.status == 'erro'"></alert-component>
         </template>
-        <template v-slot:conteudo>
+        <template v-slot:conteudo v-if="$store.state.transacaoStatus != 'sucesso'">
             
             <input-container-component titulo="ID">
                 <input type="text" class="form-control" :value="$store.state.item.id" disabled>
@@ -134,11 +134,37 @@
         </template>
         <template v-slot:rodape>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-            <button type="button" class="btn btn-danger" @click="remover()">Remover</button>
+            <button type="button" class="btn btn-danger"  @click="remover()" v-if="$store.state.transacaoStatus != 'sucesso'">Remover</button>
+        
         </template>
 
     </modal-component>
 
+    <!-- modal de atualização -->
+    <modal-component id="modalMarcaAtualizar" titulo="atualizar marca">
+
+        <template v-slot:alertas>
+        </template>
+
+        <template v-slot:conteudo>
+            <div class="form-group">
+                <input-container-component titulo="Nome da Marca" id="atualizarNome" id-help="atualizarNomeHelp" texto-ajuda="Informe o Nome da marca">
+                    <input type="text" class="form-control" id="atualizarNome" aria-describedby="atualizarNomeHelp" placeholder="Nome da Marca" v-model="$store.state.item.nome">
+                </input-container-component>
+
+            </div>
+            <div class="form-group">
+                <input-container-component titulo="Imagem" id="atualizarImagem" id-help="atualizarImagemHelp" texto-ajuda="selecione uma imagem em formato png">
+                    <input type="file" class="form-control" id="atualizarImagem" aria-describedby="atualizar    ImagemHelp" placeholder="selecione uma imagem" @change="carregarImagem($event)">
+                </input-container-component>
+            </div>
+        </template>
+
+        <template v-slot:rodape>
+            <button type="button" class="btn btn-secondary"  data-bs-dismiss="modal">Fechar</button>
+            <button type="button" class="btn btn-primary" @click="atualizar()">Atualizar</button>
+        </template>
+    </modal-component>
 </template>
 
 <script>
@@ -149,8 +175,9 @@
                         return indice.startsWith('token=')
                     })
 
-                    token = token.split('=')[1]
-                    token = 'Bearer ' + token
+                    token = token.split('=')
+                    token = 'Bearer ' + token[1]//refatorar codigo para so fazer o return do token.
+
                     return token
                 }
             },
@@ -169,6 +196,31 @@
             }
         },
         methods: {
+            atualizar(){
+                let formData = new FormData();
+                formData.append('_method', 'patch')
+                formData.append('nome', this.$store.state.item.nome)
+                formData.append('imagem', this.arquivoImagem[0])
+
+                let url = this.urlBase + '/' + this.$store.state.item.id
+
+                let config = {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Accept': 'application/json',
+                        'Authorization': this.token
+                    }
+                }
+
+                axios.post(url, formData, config)
+                    .then(response => {
+                        console.log('atualizado', response)
+                        this.carregarLista()
+                    })
+                    .catch(errors => {
+                        console.log('erro de atualização', errors.reponse)
+                    })
+            },
             remover(){
                 let confirmacao = confirm('Tem certeza que deseja remover esse registro')
 
@@ -190,11 +242,13 @@
 
                 axios.post(url, formData, config)
                     .then(response => {
-                        console.log('registro removido com sucesso', response)
+                        this.$store.state.item.transacao.status = 'sucesso'
+                        this.$store.state.item.transacao.mensagem = response
                         this.carregarLista()
                     })
                     .catch(errors => {
-                        console.log('Houve um erro ao tentar remover o registro', errors.response)
+                        this.$store.state.item.transacao.status = 'erro'
+                        this.$store.state.item.transacao.mensagem = errors.response.data.error
                     })
                     
             },
@@ -231,9 +285,7 @@
             },
 
             carregarLista(){
-
-                let url = this.urlBase + '?' + this.urlPaginacao + this.urlFiltro
-
+                
                 let config = {
                     headers: {
                         'Content-Type': 'multipart/form-data',
@@ -241,6 +293,7 @@
                         'Authorization': this.token
                     }
                 }
+                let url = this.urlBase + '?' + this.urlPaginacao + this.urlFiltro
 
                 axios.get(url, config)
                     .then(response => {
