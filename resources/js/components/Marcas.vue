@@ -171,18 +171,6 @@
 
 <script>
     export default{
-        computed: {
-                token(){
-                    let token = document.cookie.split(';').find(indice => {
-                        return indice.startsWith('token=')
-                    })
-
-                    token = token.split('=')
-                    token = 'Bearer ' + token[1]//refatorar codigo para so fazer o return do token.
-
-                    return token
-                }
-            },
 
         data(){
             return{
@@ -212,8 +200,6 @@
                 let config = {
                     headers: {
                         'Content-Type': 'multipart/form-data',
-                        'Accept': 'application/json',
-                        'Authorization': this.token
                     }
                 }
 
@@ -241,16 +227,11 @@
                 let formData = new FormData();
                 formData.append('_method', 'delete')
 
-                let config = {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': this.token
-                    }
-                }
+
 
                 let url = this.urlBase + '/' + this.$store.state.item.id
 
-                axios.post(url, formData, config)
+                axios.post(url, formData)
                     .then(response => {
                         this.$store.state.item.transacao.status = 'sucesso'
                         this.$store.state.item.transacao.mensagem = response
@@ -295,17 +276,10 @@
             },
 
             carregarLista(){
-                
-                let config = {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'Accept': 'application/json',
-                        'Authorization': this.token
-                    }
-                }
+
                 let url = this.urlBase + '?' + this.urlPaginacao + this.urlFiltro
 
-                axios.get(url, config)
+                axios.get(url)
                     .then(response => {
                         this.marcas = response.data
                         // console.log(response.data)
@@ -330,10 +304,6 @@
                 let config = {
                     headers: {
                         'Content-Type': 'multipart/form-data',
-                        'Accept': 'application/json',
-                        // sempre mudar o token
-                        'Authorization': this.token
-
                     }
                 }
 
