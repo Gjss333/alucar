@@ -69,23 +69,22 @@
 
                 let url = 'http://localhost:8000/api/login'
                 let configuracao = {
-                    method: 'post',
+                    method: 'POST',
                     body: new URLSearchParams({
                         'email': this.email,
                         'password': this.password
                     })
                 }
                 
-                fetch(url, configuracao)
-                    .then(response => response.json())
-                    .then(data => {
-                        // console.log(data.token)
-                        if(data.token){
-                            document.cookie = 'token='+data.token;SameSite=Lax
-                        }
-                    })
- 
-                e.target.submit()
+                    fetch(url, configuracao)
+                        .then(response => response.json())
+                        .then(data => {
+                            if(data.token){
+                                document.cookie = 'token='+data.token
+                                // SameSite=Lax
+                            }
+                            e.target.submit()
+                        })
             }
         } 
     }

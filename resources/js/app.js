@@ -17,7 +17,7 @@ import { createStore } from 'Vuex';
 const store = createStore({
     state: {
         item: {},
-        transacao: { status: '', mensagem: '' },
+        transacao: { status: '', mensagem: '', dados: '' },
         mutations: {
             increment (state) {
               state.count++

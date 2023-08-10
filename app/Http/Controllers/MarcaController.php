@@ -108,21 +108,27 @@ class MarcaController extends Controller
         }
         
         //remove um antigo caso um nove esteja enviado no request
+
+        $marcas->fill($request->all());
         if($request->imagem){
             Storage::disk('public')->delete($marcas->imagem);
+            $imagem = $request->imagem;
+            $imagem_urn = $imagem->store('imagens', 'imagens');
+            $marcas->imagem = $imagem_urn;
         }
-
-        $imagem = $request->imagem;
-        $imagem_urn = $imagem->store('imagens', 'public');
-        
-        $marcas->fill($request->all());
-        $marcas->imagem = $imagem_urn;
         $marcas->save();
+
+        // $imagem = $request->imagem;
+        // $imagem_urn = $imagem->store('imagens', 'public');
         
-        $marcas->update([
-            'nome' => $request->nome,
-            'imagem' => $imagem_urn
-        ]);   
+        // $marcas->fill($request->all());
+        // $marcas->imagem = $imagem_urn;
+        // $marcas->save();
+        
+        // $marcas->update([
+        //     'nome' => $request->nome,
+        //     'imagem' => $imagem_urn
+        // ]);   
         return response()->json($marcas, 200);
     }
 
