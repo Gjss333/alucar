@@ -31,3 +31,28 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //     forceTLS: (import.meta.env.VITE_PUSHER_SCHEME ?? 'https') === 'https',
 //     enabledTransports: ['ws', 'wss'],
 // });
+
+// interceptar os requiest
+axios.interceptors.request.use(
+    config => {
+        console.log('akdjaks envio', config)
+        return config
+    },
+    error =>{
+        console.log('erro', error)
+        return Promise.reject(error)
+    }
+)
+
+// interceptar os response
+
+axios.interceptors.response.use(
+    response => {
+        console.log('interceptando a resposta antes do envio', response)
+        return response
+    },
+    error => {
+        console.log('error', error)
+        return Promise.reject(error)
+    }
+)
